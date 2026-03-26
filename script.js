@@ -453,6 +453,235 @@ document.querySelector('.nav-logo')?.addEventListener('click', (e) => {
 });
 
 
+/* ---------- PAGE LOAD ANIMATION ---------- */
+(function initPageLoad() {
+  document.body.classList.add('page-loading');
+
+  function onLoad() {
+    document.body.classList.remove('page-loading');
+    document.body.classList.add('page-loaded');
+  }
+
+  if (document.readyState === 'complete') {
+    requestAnimationFrame(onLoad);
+  } else {
+    window.addEventListener('load', () => requestAnimationFrame(onLoad), { once: true });
+  }
+})();
+
+
+/* ---------- SCROLL TO TOP BUTTON ---------- */
+(function initScrollToTop() {
+  const btn = document.getElementById('scroll-to-top');
+  if (!btn) return;
+
+  window.addEventListener('scroll', () => {
+    if (window.scrollY > 400) {
+      btn.classList.add('visible');
+    } else {
+      btn.classList.remove('visible');
+    }
+  }, { passive: true });
+
+  btn.addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+})();
+
+
+/* ---------- SECTION TITLE GLOW ON SCROLL ---------- */
+(function initTitleGlow() {
+  const titles = document.querySelectorAll('.section-title');
+  if (!titles.length) return;
+
+  const glowObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('glow-active');
+      }
+    });
+  }, { threshold: 0.5 });
+
+  titles.forEach(t => glowObserver.observe(t));
+})();
+
+
+/* ---------- JEEP HINT TOOLTIP ---------- */
+(function initJeepHint() {
+  const hint = document.getElementById('jeep-hint');
+  if (!hint) return;
+
+  // Show hint a few seconds after page load
+  setTimeout(() => {
+    hint.classList.add('show');
+    // Hide after 6 seconds
+    setTimeout(() => {
+      hint.classList.remove('show');
+    }, 6000);
+  }, 3500);
+})();
+
+
+/* ---------- JEEP NAVIGATOR ---------- */
+(function initJeepNavigator() {
+  const jeep = document.getElementById('jeep-navigator');
+  const toggleBtn = document.getElementById('jeep-toggle-btn');
+  const exhaust = document.getElementById('jeep-exhaust');
+  if (!jeep || !toggleBtn) return;
+
+  let jeepActive = false;
+  let jeepX = 80;
+  let jeepY = window.innerHeight - 160;
+  const JEEP_W = 90;
+  const JEEP_H = 52;
+  const SPEED = 3.5;
+
+  // Keys currently held
+  const keys = {};
+
+  let animId;
+  let dustTimer = 0;
+
+  function getViewport() {
+    return { w: window.innerWidth, h: window.innerHeight };
+  }
+
+  function clampPos(x, y) {
+    const { w, h } = getViewport();
+    return {
+      x: Math.max(0, Math.min(w - JEEP_W, x)),
+      y: Math.max(60, Math.min(h - JEEP_H - 10, y))
+    };
+  }
+
+  function setJeepPosition(x, y) {
+    jeep.style.left = x + 'px';
+    jeep.style.top  = y + 'px';
+    jeep.style.bottom = 'auto';
+  }
+
+  function spawnDustPuff(x, y) {
+    if (!exhaust) return;
+    const puff = document.createElement('div');
+    puff.className = 'dust-puff';
+    const size = 8 + Math.random() * 10;
+    const hue  = [30, 50, 200, 300][Math.floor(Math.random() * 4)];
+    puff.style.cssText = `
+      width: ${size}px;
+      height: ${size}px;
+      background: hsla(${hue}, 70%, 60%, 0.55);
+      left: -${size / 2}px;
+      top: -${size / 2}px;
+    `;
+    exhaust.appendChild(puff);
+    // Remove after animation
+    setTimeout(() => {
+      if (puff.parentNode) puff.parentNode.removeChild(puff);
+    }, 900);
+  }
+
+  function jeepLoop() {
+    if (!jeepActive) return;
+
+    let dx = 0, dy = 0;
+    if (keys['arrowup']    || keys['w']) dy -= SPEED;
+    if (keys['arrowdown']  || keys['s']) dy += SPEED;
+    if (keys['arrowleft']  || keys['a']) dx -= SPEED;
+    if (keys['arrowright'] || keys['d']) dx += SPEED;
+
+    const moving = dx !== 0 || dy !== 0;
+
+    // Flip direction
+    if (dx < 0) {
+      jeep.classList.add('facing-left');
+    } else if (dx > 0) {
+      jeep.classList.remove('facing-left');
+    }
+
+    // Wheel spin
+    const wheels = jeep.querySelectorAll('.jeep-wheel');
+    wheels.forEach(w => {
+      if (moving) w.classList.add('spinning');
+      else        w.classList.remove('spinning');
+    });
+
+    // Bob animation pause when still
+    if (moving) jeep.classList.remove('still');
+    else        jeep.classList.add('still');
+
+    // Move
+    jeepX += dx;
+    jeepY += dy;
+    const clamped = clampPos(jeepX, jeepY);
+    jeepX = clamped.x;
+    jeepY = clamped.y;
+    setJeepPosition(jeepX, jeepY);
+
+    // Dust puffs
+    if (moving) {
+      dustTimer++;
+      if (dustTimer % 5 === 0) {
+        spawnDustPuff(jeepX, jeepY + JEEP_H / 2);
+      }
+    }
+
+    animId = requestAnimationFrame(jeepLoop);
+  }
+
+  function enableJeep() {
+    jeepActive = true;
+    jeep.classList.add('active');
+    toggleBtn.classList.add('active');
+    setJeepPosition(jeepX, jeepY);
+    animId = requestAnimationFrame(jeepLoop);
+  }
+
+  function disableJeep() {
+    jeepActive = false;
+    jeep.classList.remove('active');
+    toggleBtn.classList.remove('active');
+    cancelAnimationFrame(animId);
+    // Clear wheels
+    jeep.querySelectorAll('.jeep-wheel').forEach(w => w.classList.remove('spinning'));
+    jeep.classList.remove('still');
+  }
+
+  toggleBtn.addEventListener('click', () => {
+    if (jeepActive) disableJeep();
+    else enableJeep();
+  });
+
+  // Keyboard handlers — only fire when jeep is active, not in input fields
+  document.addEventListener('keydown', (e) => {
+    if (!jeepActive) return;
+    const tag = document.activeElement?.tagName?.toLowerCase();
+    if (tag === 'input' || tag === 'textarea') return;
+
+    const key = e.key.toLowerCase();
+    if (['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(key)) {
+      e.preventDefault();
+      keys[key] = true;
+    }
+
+    if (key === 'escape') disableJeep();
+  }, { passive: false });
+
+  document.addEventListener('keyup', (e) => {
+    keys[e.key.toLowerCase()] = false;
+  });
+
+  // Update clamp on resize
+  window.addEventListener('resize', () => {
+    if (jeepActive) {
+      const clamped = clampPos(jeepX, jeepY);
+      jeepX = clamped.x;
+      jeepY = clamped.y;
+      setJeepPosition(jeepX, jeepY);
+    }
+  }, { passive: true });
+})();
+
+
 /* ---------- INIT ---------- */
 // Trigger nav active state on load
 updateActiveNav();

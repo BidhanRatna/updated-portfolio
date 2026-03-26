@@ -1374,3 +1374,572 @@ img { max-width: 100%; display: block; }
   background: rgba(99, 102, 241, 0.3);
   color: var(--text);
 }
+
+/* ============================================
+   TASK 1 — JEEP NAVIGATOR
+   ============================================ */
+
+/* Jeep toggle button — bottom-right corner */
+.jeep-toggle-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9990;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 2px solid rgba(249, 115, 22, 0.6);
+  background: rgba(249, 115, 22, 0.15);
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(249, 115, 22, 0.25);
+}
+
+.jeep-toggle-btn:hover {
+  border-color: #f97316;
+  background: rgba(249, 115, 22, 0.3);
+  transform: scale(1.12) rotate(-5deg);
+  box-shadow: 0 8px 30px rgba(249, 115, 22, 0.45);
+}
+
+.jeep-toggle-btn.active {
+  border-color: #f97316;
+  background: rgba(249, 115, 22, 0.35);
+  box-shadow: 0 0 0 4px rgba(249, 115, 22, 0.2), 0 8px 30px rgba(249, 115, 22, 0.4);
+}
+
+/* Jeep hint tooltip */
+.jeep-hint {
+  display: none;
+  position: absolute;
+  bottom: -40px;
+  left: 0;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  letter-spacing: 0.3px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 5px 14px;
+  white-space: nowrap;
+  backdrop-filter: blur(8px);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+.jeep-hint.show {
+  display: inline-block;
+  opacity: 1;
+}
+
+/* Jeep navigator — main container */
+.jeep-navigator {
+  position: fixed;
+  bottom: 100px;
+  left: 80px;
+  z-index: 9995;
+  width: 90px;
+  height: 52px;
+  display: none;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 12px rgba(249,115,22,0.35));
+  /* body bob animation always running when visible */
+  animation: jeep-bob 0.8s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+.jeep-navigator.active {
+  display: block;
+}
+
+/* Flip jeep horizontally when moving left */
+.jeep-navigator.facing-left {
+  transform: scaleX(-1);
+}
+.jeep-navigator.facing-left.active {
+  display: block;
+}
+
+/* Body bobbing animation */
+@keyframes jeep-bob {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-3px); }
+}
+
+.jeep-navigator.facing-left {
+  animation: jeep-bob-flip 0.8s ease-in-out infinite;
+}
+
+@keyframes jeep-bob-flip {
+  0%, 100% { transform: scaleX(-1) translateY(0px); }
+  50%       { transform: scaleX(-1) translateY(-3px); }
+}
+
+/* Pause bob when not moving */
+.jeep-navigator.still {
+  animation-play-state: paused;
+}
+
+/* Body wrap */
+.jeep-body-wrap {
+  position: absolute;
+  bottom: 14px;
+  left: 4px;
+  right: 4px;
+  height: 36px;
+}
+
+.jeep-body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(160deg, #f97316, #ea580c);
+  border-radius: 6px 8px 4px 4px;
+  overflow: visible;
+}
+
+/* Roof */
+.jeep-roof {
+  position: absolute;
+  top: -16px;
+  left: 16px;
+  right: 14px;
+  height: 18px;
+  background: linear-gradient(160deg, #fb923c, #f97316);
+  border-radius: 6px 6px 2px 2px;
+  border-bottom: 2px solid rgba(0,0,0,0.15);
+}
+
+/* Windshield */
+.jeep-windshield {
+  position: absolute;
+  top: -14px;
+  right: 8px;
+  width: 14px;
+  height: 14px;
+  background: rgba(147, 210, 255, 0.7);
+  border-radius: 2px 4px 2px 2px;
+  border: 1px solid rgba(255,255,255,0.3);
+}
+
+/* Windows */
+.jeep-window {
+  position: absolute;
+  top: -12px;
+  height: 12px;
+  background: rgba(147, 210, 255, 0.6);
+  border-radius: 2px;
+  border: 1px solid rgba(255,255,255,0.25);
+}
+
+.jeep-window-front {
+  right: 22px;
+  width: 18px;
+}
+
+.jeep-window-rear {
+  left: 18px;
+  width: 15px;
+}
+
+/* Headlights */
+.jeep-headlight {
+  position: absolute;
+  top: 10px;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+}
+
+.jeep-headlight-front {
+  right: 1px;
+  background: #fef08a;
+  box-shadow: 0 0 6px 2px rgba(254,240,138,0.8);
+}
+
+.jeep-headlight-rear {
+  left: 1px;
+  background: #fca5a5;
+  box-shadow: 0 0 4px 1px rgba(252,165,165,0.6);
+}
+
+/* Door detail line */
+.jeep-door-line {
+  position: absolute;
+  top: 8px;
+  left: 30px;
+  width: 1px;
+  height: 20px;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Wheels */
+.jeep-wheel {
+  position: absolute;
+  bottom: 0;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #1c1917;
+  border: 3px solid #44403c;
+  box-sizing: border-box;
+  /* spin animation will be toggled by JS class */
+}
+
+.jeep-wheel.spinning {
+  animation: wheel-spin 0.4s linear infinite;
+}
+
+.jeep-wheel-front {
+  right: 6px;
+}
+
+.jeep-wheel-rear {
+  left: 6px;
+}
+
+@keyframes wheel-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* Wheel hub cap */
+.jeep-wheel-inner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #78716c;
+}
+
+/* Wheel spokes */
+.jeep-wheel-spoke {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 1.5px;
+  background: #78716c;
+  transform-origin: 0 50%;
+  transform: translate(0, -50%) rotate(0deg);
+}
+
+.jeep-spoke-2 { transform: translate(0, -50%) rotate(120deg); }
+.jeep-spoke-3 { transform: translate(0, -50%) rotate(240deg); }
+
+/* Exhaust / dust puffs container */
+.jeep-exhaust {
+  position: absolute;
+  left: -2px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* Individual dust puff — created by JS */
+.dust-puff {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  animation: dust-drift 0.8s ease-out forwards;
+}
+
+@keyframes dust-drift {
+  0%   { opacity: 0.7; transform: scale(0.3) translateX(0); }
+  60%  { opacity: 0.4; }
+  100% { opacity: 0;   transform: scale(1.5) translateX(-28px) translateY(-10px); }
+}
+
+/* ============================================
+   TASK 2 — VIBRANT UI
+   ============================================ */
+
+/* Coral / orange accent */
+:root {
+  --accent-coral: #f97316;
+  --accent-coral-light: #fb923c;
+}
+
+/* Animated gradient mesh background for hero */
+.hero-gradient-mesh {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse 700px 600px at 10% 40%, rgba(99, 102, 241, 0.18) 0%, transparent 65%),
+    radial-gradient(ellipse 500px 400px at 90% 10%, rgba(139, 92, 246, 0.14) 0%, transparent 60%),
+    radial-gradient(ellipse 600px 500px at 60% 80%, rgba(249, 115, 22, 0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 400px 350px at 30% 70%, rgba(6, 182, 212, 0.09) 0%, transparent 55%);
+  background-size: 200% 200%;
+  animation: mesh-drift 12s ease-in-out infinite alternate;
+}
+
+@keyframes mesh-drift {
+  0%   { background-position: 0% 0%, 100% 0%, 50% 100%, 0% 50%; }
+  33%  { background-position: 30% 20%, 70% 30%, 80% 70%, 20% 80%; }
+  66%  { background-position: 60% 40%, 40% 60%, 20% 40%, 80% 20%; }
+  100% { background-position: 100% 100%, 0% 100%, 100% 0%, 100% 100%; }
+}
+
+/* Colorful glow on section titles when scrolled into view */
+.section-title.glow-active {
+  text-shadow:
+    0 0 40px rgba(99, 102, 241, 0.3),
+    0 0 80px rgba(139, 92, 246, 0.15);
+}
+
+#skills .section-title.glow-active {
+  text-shadow: 0 0 40px rgba(6, 182, 212, 0.3), 0 0 80px rgba(6, 182, 212, 0.15);
+}
+
+#projects .section-title.glow-active {
+  text-shadow: 0 0 40px rgba(236, 72, 153, 0.3), 0 0 80px rgba(249, 115, 22, 0.15);
+}
+
+#experience .section-title.glow-active {
+  text-shadow: 0 0 40px rgba(16, 185, 129, 0.3), 0 0 80px rgba(6, 182, 212, 0.15);
+}
+
+#achievements .section-title.glow-active {
+  text-shadow: 0 0 40px rgba(245, 158, 11, 0.35), 0 0 80px rgba(239, 68, 68, 0.15);
+}
+
+#contact .section-title.glow-active {
+  text-shadow: 0 0 40px rgba(99, 102, 241, 0.3), 0 0 80px rgba(139, 92, 246, 0.15);
+}
+
+/* Project cards — colorful gradient shimmer on hover */
+.project-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.project-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    rgba(99, 102, 241, 0.06) 30%,
+    rgba(249, 115, 22, 0.07) 50%,
+    rgba(139, 92, 246, 0.06) 70%,
+    transparent 100%
+  );
+  background-size: 300% 300%;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+  border-radius: inherit;
+  animation: shimmer-bg 3s ease-in-out infinite;
+}
+
+.project-card:hover::after {
+  opacity: 1;
+}
+
+@keyframes shimmer-bg {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Nav links — colorful animated underline on hover */
+.nav-link {
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 3px;
+  left: 14px;
+  right: 14px;
+  height: 2px;
+  background: linear-gradient(90deg, #6366f1, #f97316, #ec4899, #06b6d4);
+  background-size: 300% 100%;
+  border-radius: 2px;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s ease;
+  animation: nav-underline-flow 3s linear infinite;
+}
+
+.nav-link:hover::after,
+.nav-link.active::after {
+  transform: scaleX(1);
+}
+
+@keyframes nav-underline-flow {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 300% 0%; }
+}
+
+/* Skill progress bars — different gradient colors per bar */
+.skill-bar-item:nth-child(1) .bar-fill {
+  background: linear-gradient(90deg, #6366f1, #8b5cf6);
+}
+.skill-bar-item:nth-child(2) .bar-fill {
+  background: linear-gradient(90deg, #f97316, #ec4899);
+}
+.skill-bar-item:nth-child(3) .bar-fill {
+  background: linear-gradient(90deg, #06b6d4, #6366f1);
+}
+.skill-bar-item:nth-child(4) .bar-fill {
+  background: linear-gradient(90deg, #10b981, #06b6d4);
+}
+
+/* Ambient drifting orbs in background sections */
+.ambient-orb {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(90px);
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+[data-theme="dark"] .ambient-orb { opacity: 0.07; }
+[data-theme="light"] .ambient-orb { opacity: 0.04; }
+
+.orb-1 {
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, #6366f1, transparent 70%);
+  top: 30%;
+  left: -120px;
+  animation: orb-float 18s ease-in-out infinite;
+}
+
+.orb-2 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, #f97316, transparent 70%);
+  top: 55%;
+  right: -80px;
+  animation: orb-float 22s ease-in-out infinite reverse;
+  animation-delay: -7s;
+}
+
+.orb-3 {
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(circle, #ec4899, transparent 70%);
+  bottom: 20%;
+  left: 40%;
+  animation: orb-float 16s ease-in-out infinite;
+  animation-delay: -4s;
+}
+
+.orb-4 {
+  width: 320px;
+  height: 320px;
+  background: radial-gradient(circle, #06b6d4, transparent 70%);
+  top: 10%;
+  right: 25%;
+  animation: orb-float 20s ease-in-out infinite reverse;
+  animation-delay: -11s;
+}
+
+@keyframes orb-float {
+  0%   { transform: translate(0, 0) scale(1); }
+  25%  { transform: translate(40px, -30px) scale(1.05); }
+  50%  { transform: translate(-20px, 50px) scale(0.95); }
+  75%  { transform: translate(30px, 20px) scale(1.02); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+/* ============================================
+   TASK 3 — POLISH
+   ============================================ */
+
+/* Page-load animation — body starts hidden, reveals on load */
+body.page-loading {
+  overflow: hidden;
+}
+
+body.page-loading .navbar,
+body.page-loading .hero-content,
+body.page-loading .hero-floating-shapes {
+  opacity: 0;
+  transform: translateY(20px);
+}
+
+body.page-loaded .navbar {
+  animation: load-fade-up 0.6s ease forwards;
+}
+
+body.page-loaded .hero-content {
+  animation: load-fade-up 0.8s ease 0.15s forwards;
+}
+
+body.page-loaded .hero-floating-shapes {
+  animation: load-fade-up 1s ease 0.3s forwards;
+}
+
+@keyframes load-fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Scroll-to-top button — bottom-left */
+.scroll-to-top {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  z-index: 9980;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #6366f1, #f97316);
+  color: #fff;
+  font-size: 1.4rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.45);
+  opacity: 0;
+  transform: translateY(12px) scale(0.85);
+  pointer-events: none;
+  transition: opacity 0.35s ease, transform 0.35s ease, box-shadow 0.3s ease;
+}
+
+.scroll-to-top.visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.scroll-to-top:hover {
+  box-shadow: 0 8px 32px rgba(249, 115, 22, 0.55);
+  transform: translateY(-3px) scale(1.08);
+}
+
+/* Noise texture overlay */
+.noise-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 180px 180px;
+}
+
+[data-theme="dark"] .noise-overlay { opacity: 0.035; }
+[data-theme="light"] .noise-overlay { opacity: 0.018; }

@@ -38,6 +38,8 @@
   <!-- HERO -->
   <section class="hero" id="hero">
     <canvas id="particle-canvas"></canvas>
+    <!-- Animated gradient mesh background -->
+    <div class="hero-gradient-mesh" aria-hidden="true"></div>
     <div class="hero-content">
       <div class="hero-badges reveal">
         <div class="hero-badge">
@@ -60,6 +62,8 @@
         <div class="scroll-line"></div>
         <span>Scroll</span>
       </div>
+      <!-- Jeep hint tooltip -->
+      <div class="jeep-hint" id="jeep-hint" aria-hidden="true">🚙 Press W/A/S/D or arrow keys to drive around</div>
     </div>
     <div class="hero-floating-shapes">
       <div class="shape shape-1"></div>
@@ -555,6 +559,56 @@
       </div>
     </div>
   </footer>
+
+  <!-- SCROLL TO TOP BUTTON -->
+  <button class="scroll-to-top" id="scroll-to-top" aria-label="Scroll to top">&#8679;</button>
+
+  <!-- JEEP TOGGLE BUTTON -->
+  <button class="jeep-toggle-btn" id="jeep-toggle-btn" aria-label="Toggle Jeep Navigator" title="Toggle Jeep Navigator">🚙</button>
+
+  <!-- CSS JEEP NAVIGATOR -->
+  <div class="jeep-navigator" id="jeep-navigator" aria-hidden="true">
+    <div class="jeep-body-wrap">
+      <div class="jeep-body">
+        <!-- Roof -->
+        <div class="jeep-roof"></div>
+        <!-- Windshield -->
+        <div class="jeep-windshield"></div>
+        <!-- Windows -->
+        <div class="jeep-window jeep-window-front"></div>
+        <div class="jeep-window jeep-window-rear"></div>
+        <!-- Headlights -->
+        <div class="jeep-headlight jeep-headlight-front"></div>
+        <div class="jeep-headlight jeep-headlight-rear"></div>
+        <!-- Door detail -->
+        <div class="jeep-door-line"></div>
+        <!-- Exhaust smoke trail container -->
+        <div class="jeep-exhaust" id="jeep-exhaust"></div>
+      </div>
+    </div>
+    <!-- Wheels -->
+    <div class="jeep-wheel jeep-wheel-front">
+      <div class="jeep-wheel-inner"></div>
+      <div class="jeep-wheel-spoke"></div>
+      <div class="jeep-wheel-spoke jeep-spoke-2"></div>
+      <div class="jeep-wheel-spoke jeep-spoke-3"></div>
+    </div>
+    <div class="jeep-wheel jeep-wheel-rear">
+      <div class="jeep-wheel-inner"></div>
+      <div class="jeep-wheel-spoke"></div>
+      <div class="jeep-wheel-spoke jeep-spoke-2"></div>
+      <div class="jeep-wheel-spoke jeep-spoke-3"></div>
+    </div>
+  </div>
+
+  <!-- Colorful drifting orbs for non-hero sections -->
+  <div class="ambient-orb orb-1" aria-hidden="true"></div>
+  <div class="ambient-orb orb-2" aria-hidden="true"></div>
+  <div class="ambient-orb orb-3" aria-hidden="true"></div>
+  <div class="ambient-orb orb-4" aria-hidden="true"></div>
+
+  <!-- Noise texture overlay -->
+  <div class="noise-overlay" aria-hidden="true"></div>
 
   <script src="script.js"></script>
 </body>
