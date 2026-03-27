@@ -592,20 +592,25 @@ document.querySelector('.nav-logo')?.addEventListener('click', (e) => {
     const moving = dx !== 0 || dy !== 0;
 
     // Rotate jeep to face direction of travel
-    let rotate = 0;
-    let flipX = 1;
     if (dx !== 0 || dy !== 0) {
       if (Math.abs(dx) >= Math.abs(dy)) {
-        // Horizontal dominant — face left or right
-        rotate = 0;
-        flipX = dx < 0 ? -1 : 1;
+        // Horizontal — side view, flip to face left or right
+        const flip = dx < 0 ? -1 : 1;
+        jeep.style.transform = `scaleX(${flip})`;
       } else {
-        // Vertical dominant — rotate 90deg to face up/down
-        rotate = dy > 0 ? 90 : -90;
-        flipX = 1;
+        // Vertical — drone/aerial 3D view
+        // perspective(250px) rotateX(±50deg) tilts the element in 3D (top/bottom depth),
+        // then rotate(±90deg) spins the already-tilted jeep to face up or down.
+        // Result: the front of the car appears smaller (going away) — classic drone look.
+        if (dy > 0) {
+          // Going DOWN: front goes away (bottom of screen = smaller)
+          jeep.style.transform = `perspective(250px) rotateX(50deg) rotate(90deg) scaleY(0.85)`;
+        } else {
+          // Going UP: front comes toward viewer (top of screen = larger)
+          jeep.style.transform = `perspective(250px) rotateX(-50deg) rotate(-90deg) scaleY(0.85)`;
+        }
       }
     }
-    jeep.style.transform = `scaleX(${flipX}) rotate(${rotate}deg)`;
 
     // Wheel spin
     const wheels = jeep.querySelectorAll('.jeep-wheel');
