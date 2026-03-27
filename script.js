@@ -591,12 +591,21 @@ document.querySelector('.nav-logo')?.addEventListener('click', (e) => {
 
     const moving = dx !== 0 || dy !== 0;
 
-    // Flip direction
-    if (dx < 0) {
-      jeep.classList.add('facing-left');
-    } else if (dx > 0) {
-      jeep.classList.remove('facing-left');
+    // Rotate jeep to face direction of travel
+    let rotate = 0;
+    let flipX = 1;
+    if (dx !== 0 || dy !== 0) {
+      if (Math.abs(dx) >= Math.abs(dy)) {
+        // Horizontal dominant — face left or right
+        rotate = 0;
+        flipX = dx < 0 ? -1 : 1;
+      } else {
+        // Vertical dominant — rotate 90deg to face up/down
+        rotate = dy > 0 ? 90 : -90;
+        flipX = 1;
+      }
     }
+    jeep.style.transform = `scaleX(${flipX}) rotate(${rotate}deg)`;
 
     // Wheel spin
     const wheels = jeep.querySelectorAll('.jeep-wheel');
@@ -609,13 +618,16 @@ document.querySelector('.nav-logo')?.addEventListener('click', (e) => {
     if (moving) jeep.classList.remove('still');
     else        jeep.classList.add('still');
 
-    // Move
+    // Move jeep position
     jeepX += dx;
     jeepY += dy;
     const clamped = clampPos(jeepX, jeepY);
     jeepX = clamped.x;
     jeepY = clamped.y;
     setJeepPosition(jeepX, jeepY);
+
+    // Scroll the page along with vertical movement
+    if (dy !== 0) window.scrollBy({ top: dy * 2, behavior: 'instant' });
 
     // Dust puffs
     if (moving) {
