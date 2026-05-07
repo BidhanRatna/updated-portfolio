@@ -1450,8 +1450,6 @@ img { max-width: 100%; display: block; }
   pointer-events: none;
   filter: drop-shadow(0 4px 12px rgba(249,115,22,0.35));
   transform-origin: center center;
-  /* smooth direction changes */
-  transition: transform 0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .jeep-navigator.active {

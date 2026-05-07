@@ -534,11 +534,13 @@ document.querySelector('.nav-logo')?.addEventListener('click', (e) => {
   let jeepY = window.innerHeight - 160;
   const JEEP_W = 90;
   const JEEP_H = 52;
-  const SPEED = 3.5;
+  const ACCEL = 0.55;
+  const FRICTION = 0.80;
+  const MAX_SPEED = 5;
 
-  // Keys currently held
+  let vx = 0, vy = 0;
+  let currentFlip = 1; // 1 = facing right, -1 = facing left
   const keys = {};
-
   let animId;
   let dustTimer = 0;
 
@@ -560,93 +562,66 @@ document.querySelector('.nav-logo')?.addEventListener('click', (e) => {
     jeep.style.bottom = 'auto';
   }
 
-  function spawnDustPuff(x, y) {
+  function spawnDustPuff() {
     if (!exhaust) return;
     const puff = document.createElement('div');
     puff.className = 'dust-puff';
     const size = 8 + Math.random() * 10;
     const hue  = [30, 50, 200, 300][Math.floor(Math.random() * 4)];
-    puff.style.cssText = `
-      width: ${size}px;
-      height: ${size}px;
-      background: hsla(${hue}, 70%, 60%, 0.55);
-      left: -${size / 2}px;
-      top: -${size / 2}px;
-    `;
+    puff.style.cssText = `width:${size}px;height:${size}px;background:hsla(${hue},70%,60%,0.55);left:-${size/2}px;top:-${size/2}px;`;
     exhaust.appendChild(puff);
-    // Remove after animation
-    setTimeout(() => {
-      if (puff.parentNode) puff.parentNode.removeChild(puff);
-    }, 900);
+    setTimeout(() => puff.parentNode && puff.parentNode.removeChild(puff), 900);
   }
 
   function jeepLoop() {
     if (!jeepActive) return;
 
-    let dx = 0, dy = 0;
-    if (keys['arrowup']    || keys['w']) dy -= SPEED;
-    if (keys['arrowdown']  || keys['s']) dy += SPEED;
-    if (keys['arrowleft']  || keys['a']) dx -= SPEED;
-    if (keys['arrowright'] || keys['d']) dx += SPEED;
+    let ax = 0, ay = 0;
+    if (keys['arrowleft']  || keys['a']) ax -= ACCEL;
+    if (keys['arrowright'] || keys['d']) ax += ACCEL;
+    if (keys['arrowup']    || keys['w']) ay -= ACCEL;
+    if (keys['arrowdown']  || keys['s']) ay += ACCEL;
 
-    const moving = dx !== 0 || dy !== 0;
+    vx = (vx + ax) * FRICTION;
+    vy = (vy + ay) * FRICTION;
 
-    // Rotate jeep to face direction of travel
-    if (dx !== 0 || dy !== 0) {
-      if (Math.abs(dx) >= Math.abs(dy)) {
-        // Horizontal — side view, flip to face left or right
-        const flip = dx < 0 ? -1 : 1;
-        jeep.style.transform = `scaleX(${flip})`;
-      } else {
-        // Vertical — drone/aerial 3D view
-        // perspective(250px) rotateX(±50deg) tilts the element in 3D (top/bottom depth),
-        // then rotate(±90deg) spins the already-tilted jeep to face up or down.
-        // Result: the front of the car appears smaller (going away) — classic drone look.
-        if (dy > 0) {
-          // Going DOWN: front goes away (bottom of screen = smaller)
-          jeep.style.transform = `perspective(250px) rotateX(50deg) rotate(90deg) scaleY(0.85)`;
-        } else {
-          // Going UP: front comes toward viewer (top of screen = larger)
-          jeep.style.transform = `perspective(250px) rotateX(-50deg) rotate(-90deg) scaleY(0.85)`;
-        }
-      }
-    }
+    const spd = Math.hypot(vx, vy);
+    if (spd > MAX_SPEED) { vx = vx / spd * MAX_SPEED; vy = vy / spd * MAX_SPEED; }
+
+    const moving = spd > 0.15;
+
+    // Flip direction based on horizontal velocity
+    if (Math.abs(vx) > 0.3) currentFlip = vx > 0 ? 1 : -1;
+
+    // Lean forward/back based on vertical speed — corrected for flip direction
+    const lean = vy * 2.5 * currentFlip;
+    jeep.style.transform = `scaleX(${currentFlip}) rotate(${lean}deg)`;
 
     // Wheel spin
-    const wheels = jeep.querySelectorAll('.jeep-wheel');
-    wheels.forEach(w => {
-      if (moving) w.classList.add('spinning');
-      else        w.classList.remove('spinning');
+    jeep.querySelectorAll('.jeep-wheel').forEach(w => {
+      moving ? w.classList.add('spinning') : w.classList.remove('spinning');
     });
 
-    // Bob animation pause when still
-    if (moving) jeep.classList.remove('still');
-    else        jeep.classList.add('still');
+    moving ? jeep.classList.remove('still') : jeep.classList.add('still');
 
-    // Move jeep position
-    jeepX += dx;
-    jeepY += dy;
+    jeepX += vx;
+    jeepY += vy;
     const clamped = clampPos(jeepX, jeepY);
     jeepX = clamped.x;
     jeepY = clamped.y;
     setJeepPosition(jeepX, jeepY);
 
-    // Scroll the page along with vertical movement
-    if (dy !== 0) window.scrollBy({ top: dy * 2, behavior: 'instant' });
+    // Scroll page along with vertical movement
+    if (Math.abs(vy) > 0.1) window.scrollBy({ top: vy * 2, behavior: 'instant' });
 
-    // Dust puffs
-    if (moving) {
-      dustTimer++;
-      if (dustTimer % 5 === 0) {
-        spawnDustPuff(jeepX, jeepY + JEEP_H / 2);
-      }
-    }
+    if (moving && ++dustTimer % 6 === 0) spawnDustPuff();
 
     animId = requestAnimationFrame(jeepLoop);
   }
 
   function enableJeep() {
     jeepActive = true;
+    vx = 0; vy = 0;
     jeep.classList.add('active');
     toggleBtn.classList.add('active');
     setJeepPosition(jeepX, jeepY);
@@ -655,46 +630,36 @@ document.querySelector('.nav-logo')?.addEventListener('click', (e) => {
 
   function disableJeep() {
     jeepActive = false;
+    vx = 0; vy = 0;
     jeep.classList.remove('active');
     toggleBtn.classList.remove('active');
     cancelAnimationFrame(animId);
-    // Clear wheels
     jeep.querySelectorAll('.jeep-wheel').forEach(w => w.classList.remove('spinning'));
     jeep.classList.remove('still');
+    jeep.style.transform = '';
   }
 
-  toggleBtn.addEventListener('click', () => {
-    if (jeepActive) disableJeep();
-    else enableJeep();
-  });
+  toggleBtn.addEventListener('click', () => jeepActive ? disableJeep() : enableJeep());
 
-  // Keyboard handlers — only fire when jeep is active, not in input fields
   document.addEventListener('keydown', (e) => {
     if (!jeepActive) return;
     const tag = document.activeElement?.tagName?.toLowerCase();
     if (tag === 'input' || tag === 'textarea') return;
-
     const key = e.key.toLowerCase();
     if (['arrowup','arrowdown','arrowleft','arrowright','w','a','s','d'].includes(key)) {
       e.preventDefault();
       keys[key] = true;
     }
-
     if (key === 'escape') disableJeep();
   }, { passive: false });
 
-  document.addEventListener('keyup', (e) => {
-    keys[e.key.toLowerCase()] = false;
-  });
+  document.addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
 
-  // Update clamp on resize
   window.addEventListener('resize', () => {
-    if (jeepActive) {
-      const clamped = clampPos(jeepX, jeepY);
-      jeepX = clamped.x;
-      jeepY = clamped.y;
-      setJeepPosition(jeepX, jeepY);
-    }
+    if (!jeepActive) return;
+    const clamped = clampPos(jeepX, jeepY);
+    jeepX = clamped.x; jeepY = clamped.y;
+    setJeepPosition(jeepX, jeepY);
   }, { passive: true });
 })();
 
