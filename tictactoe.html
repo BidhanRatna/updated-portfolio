@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Tic Tac Toe</title>
+    <style>
+        body { font-family: sans-serif; display: flex; flex-direction: column; align-items: center; margin-top: 50px; background-color: #fafafa; }
+        .board { display: grid; grid-template-columns: repeat(3, 100px); gap: 5px; }
+        .cell { width: 100px; height: 100px; display: flex; justify-content: center; align-items: center; font-size: 2.5em; background-color: #fff; border: 2px solid #333; cursor: pointer; }
+        .cell:hover { background-color: #f0f0f0; }
+        #message { margin-top: 20px; font-size: 1.5em; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h2>Tic Tac Toe</h2>
+    <div class="board" id="board"></div>
+    <p id="message"></p>
+    <script>
+        let board = ['', '', '', '', '', '', '', '', ''];
+        let currentPlayer = 'X';
+        const boardElement = document.getElementById('board');
+        const messageElement = document.getElementById('message');
+
+        function checkWinner() {
+            const wins = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
+            for (let combo of wins) {
+                if (board[combo[0]] && board[combo[0]] === board[combo[1]] && board[combo[0]] === board[combo[2]]) {
+                    return board[combo[0]];
+                }
+            }
+            return board.includes('') ? null : 'Tie';
+        }
+
+        function makeMove(index) {
+            if (board[index] || checkWinner()) return;
+            board[index] = currentPlayer;
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            render();
+        }
+
+        function render() {
+            boardElement.innerHTML = '';
+            board.forEach((cell, i) => {
+                const div = document.createElement('div');
+                div.className = 'cell';
+                div.innerText = cell;
+                div.onclick = () => makeMove(i);
+                boardElement.appendChild(div);
+            });
+            const winner = checkWinner();
+            if (winner) messageElement.innerText = winner === 'Tie' ? "It's a tie!" : winner + " wins!";
+            else messageElement.innerText = "Current Player: " + currentPlayer;
+        }
+        render();
+    </script>
+</body>
+</html>
