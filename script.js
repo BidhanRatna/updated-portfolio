@@ -390,7 +390,7 @@ document.querySelectorAll('.stat-value').forEach(el => {
   const phrases = [
     'Computer Science Senior & AI/ML Enthusiast',
     'Deep Learning Researcher',
-    'CNR Intern',
+    'Full Stack Developer',
     'Cybersecurity Learner',
   ];
 
